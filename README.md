@@ -1,1 +1,2 @@
-# backend_gallery_app
+# galllety_backend
+Backend code for image gallery app
