@@ -1,5 +1,7 @@
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { S3Client, ListObjectsV2Command, GetObjectCommand } = require('@aws-sdk/client-s3');
 const { Upload } = require('@aws-sdk/lib-storage');
+const { Readable } = require('stream');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 require('dotenv').config();
@@ -41,23 +43,53 @@ const uploadFile = async (req, res) => {
   }
 };
 
-const listFiles = (req, res) => {
+const listFiles = async (req, res) => {
+  const userId = req.params.userId;
   const params = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
-    Prefix: `${req.params.userId}/`,
+    Prefix: `${userId}/`,
   };
 
-  s3.send(new ListObjectsV2Command(params), (err, data) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({ error: err.message });
+  try {
+    const data = await s3.send(new ListObjectsV2Command(params));
+    const mediaFiles = [];
+
+    for (const item of data.Contents) {
+      const fileKey = item.Key;
+      const fileType = getFileType(fileKey);
+
+      // Generate a signed URL that expires in 1 hour
+      const getCommand = new GetObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: fileKey,
+      });
+
+      const signedUrl = await getSignedUrl(s3, getCommand, { expiresIn: 3600 }); // 1 hour expiry
+
+      mediaFiles.push({
+        url: signedUrl,
+        type: fileType,
+      });
     }
 
-    const fileUrls = data.Contents.map((item) => {
-      return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key}`;
-    });
-    return res.status(200).json(fileUrls);
-  });
+    res.status(200).json(mediaFiles);
+  } catch (error) {
+    console.error('Error listing files:', error);
+    res.status(500).json({ error: error.message });
+  }
 };
+
+// Function to get file type based on file extension
+const getFileType = (key) => {
+  const extension = key.split('.').pop().toLowerCase();
+  if (extension === 'mp4' || extension === 'mov' || extension === 'avi') {
+    return 'video';
+  } else if (extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif') {
+    return 'image';
+  }
+  // Add more types as needed
+  return 'unknown';
+};
+
 
 module.exports = { uploadFile, listFiles, upload: upload.single('media') };
