@@ -30,23 +30,30 @@ To set up the repository and run the backend server locally, follow these steps:
 
 2. **_Install dependencies_**
 
+```bash
    npm install
+
+```
 
 3. **_Set up environment variables:_**
    Create a .env file in the root directory and add the following environment variables:
-
+```bash
    PORT=your_port_number
    MONGO_URL=your_mongodb_connection_string
    AWS_ACCESS_KEY_ID=your_aws_access_key_id
    AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
    AWS_REGION=your_aws_region
    AWS_S3_BUCKET_NAME=your_aws_s3_bucket_name
+```
+
 
 4. **_Set up AWS S3:_**
    Ensure you have an AWS S3 bucket set up with the appropriate permissions for your access keys.
 
 5. **_Start the server:_**
+   ```bash
    node index.js
+   ```
 
 API Endpoints
 Here are the primary API endpoints provided by this backend:
