@@ -54,6 +54,12 @@ To set up the repository and run the backend server locally, follow these steps:
    ```bash
    node index.js
    ```
+6. You can also use ngrok to tunnel your local server to remote. Check docs
+   ```bash
+   https://ngrok.com/docs/getting-started/?os=windows
+   ```
+   use ```bash ngrok http YOUR_PORT_HERE ``` after setting up ngrok.
+
 
 API Endpoints
 Here are the primary API endpoints provided by this backend:
