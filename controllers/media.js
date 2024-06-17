@@ -29,7 +29,7 @@ const upload = multer({
 
 const uploadFile = async (req, res) => {
   try {
-    // Multer will populate req.file
+    // console.log('req',req.file)
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded!' });
     }
@@ -87,7 +87,6 @@ const getFileType = (key) => {
   } else if (extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif') {
     return 'image';
   }
-  // Add more types as needed
   return 'unknown';
 };
 
